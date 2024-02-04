@@ -44,7 +44,14 @@ namespace ClientStateless
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
                                     .UseUrls(url);
-                        
+
+                        builder.Services.AddDistributedMemoryCache();
+                        builder.Services.AddSession(options =>
+                        {
+                            options.IdleTimeout = TimeSpan.FromMinutes(120);
+                            options.Cookie.HttpOnly = true;
+                        });
+
                         // Add services to the container.
                         builder.Services.AddControllersWithViews();
                         
@@ -53,21 +60,21 @@ namespace ClientStateless
                         // Configure the HTTP request pipeline.
                         if (!app.Environment.IsDevelopment())
                         {
-                        app.UseExceptionHandler("/Home/Error");
+                            app.UseExceptionHandler("/Home/Error");
                         }
                         app.UseStaticFiles();
                         
                         app.UseRouting();
                         
+                        app.UseSession();
+
                         app.UseAuthorization();
                         
                         app.MapControllerRoute(
                         name: "default",
                         pattern: "{controller=Home}/{action=Index}/{id?}");
                         
-                        
                         return app;
-
                     }))
             };
         }
