@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <StartupServices xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
+    <Parameter Name="UsersStateful_PartitionCount" Value="1" />
+    <Parameter Name="UsersStateful_MinReplicaSetSize" Value="3" />
+    <Parameter Name="UsersStateful_TargetReplicaSetSize" Value="3" />
+    <Parameter Name="ApiGatewayStateless_InstanceCount" Value="-1" />
     <Parameter Name="ClientStateless_InstanceCount" Value="-1" />
   </Parameters>
 </StartupServices>

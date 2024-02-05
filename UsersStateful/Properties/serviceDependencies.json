@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "secrets1": {
+      "type": "secrets",
+      "connectionId": null
+    },
+    "storage1": {
+      "type": "storage",
+      "connectionId": "ConnectionString",
+      "dynamicId": null
+    }
+  }
+}
