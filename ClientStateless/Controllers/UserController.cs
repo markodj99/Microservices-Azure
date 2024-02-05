@@ -12,7 +12,8 @@ namespace ClientStateless.Controllers
         private readonly IApiGateway _proxy 
             = ServiceProxy.Create<IApiGateway>(new Uri("fabric:/Cloud-Project/ApiGatewayStateless"));
 
-        public IActionResult Login() => View();
+        public IActionResult Login()
+            => HttpContext.Session.GetString("Email") is not null ? RedirectToAction("Index", "Home") : View();
 
         [HttpPost]
         public async Task<IActionResult> Login(Login credentials)
@@ -43,7 +44,8 @@ namespace ClientStateless.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        public IActionResult Register() => View();
+        public IActionResult Register()
+            => HttpContext.Session.GetString("Email") is not null ? RedirectToAction("Index", "Home") : View();
 
         [HttpPost]
         public async Task<IActionResult> Register(Register credentials)
@@ -56,13 +58,49 @@ namespace ClientStateless.Controllers
                     return RedirectToAction("Login", "User");
                 }
 
-                TempData["Error"] = "Username or email already taken.";
+                TempData["Error"] = "Email already taken. Login instead.";
                 return View();
             }
             catch (Exception)
             {
                 TempData["Error"] = "Something went wrong, please try again later.";
                 return View();
+            }
+        }
+
+        public async Task<IActionResult> Edit()
+        {
+            if (HttpContext.Session.GetString("Email") is null) return RedirectToAction("Login", "User");
+
+            var editProfile = await _proxy.GetUserDataAsync(HttpContext.Session.GetString("Email") ?? "Error");
+
+            if (editProfile is null)
+            {
+                TempData["Error"] = "Something went wrong, please try again later.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(editProfile);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditProfile credentials)
+        {
+            try
+            {
+                if (await _proxy.UpdateProfileAsync(credentials))
+                {
+                    TempData["Success"] = "Update Successful.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                TempData["Error"] = "Form Wrongly Filled.";
+                return RedirectToAction("Edit", "User");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Something went wrong, please try again later.";
+                return RedirectToAction("Edit", "User");
             }
         }
     }

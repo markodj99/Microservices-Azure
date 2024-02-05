@@ -12,5 +12,11 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<bool> RegisterAsync(Register credentials);
+
+        [OperationContract]
+        Task<EditProfile?> GetUserDataAsync(string email);
+
+        [OperationContract]
+        Task<bool> UpdateProfileAsync(EditProfile credentials);
     }
 }

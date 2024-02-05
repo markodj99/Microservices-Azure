@@ -24,7 +24,13 @@ namespace ApiGatewayStateless
             => await _proxy.LoginAsync(credentials);
 
         public async Task<bool> RegisterAsync(Register credentials)
-        => await _proxy.RegisterAsync(credentials);
+            => await _proxy.RegisterAsync(credentials);
+
+        public async Task<EditProfile?> GetUserDataAsync(string email)
+            => await _proxy.GetUserDataAsync(email);
+
+        public async Task<bool> UpdateProfileAsync(EditProfile credentials)
+            => await _proxy.UpdateProfileAsync(credentials);
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();

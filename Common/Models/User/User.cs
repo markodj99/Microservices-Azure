@@ -29,5 +29,12 @@ namespace Common.Models.User
             this.Email = user.Email;
             this.Password = user.Password;
         }
+
+        public User(EditProfile user)
+        {
+            this.Username = user.Username;
+            this.Email = user.Email;
+            this.Password = user.NewPassword;
+        }
     }
 }

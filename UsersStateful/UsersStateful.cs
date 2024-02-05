@@ -32,8 +32,6 @@ namespace UsersStateful
                 {
                     if (userResult.Value.Password == credentials.Password) status = true;
                 }
-
-                await tx.CommitAsync();
             }
 
             return status;
@@ -49,16 +47,66 @@ namespace UsersStateful
 
                 if (!userResult.HasValue)
                 {
-                    try
+                    if (!credentials.Password.Equals(credentials.ConfirmPassword)) status = false;
+                    else
                     {
-                        await userDictionary.AddAsync(tx, credentials.Email, new User(credentials));
-                        await tx.CommitAsync();
-                        status = true;
+                        try
+                        {
+                            await userDictionary.AddAsync(tx, credentials.Email, new User(credentials));
+                            await tx.CommitAsync();
+                            status = true;
+                        }
+                        catch (Exception)
+                        {
+                            status = false;
+                            tx.Abort();
+                        }
                     }
-                    catch (Exception)
+                }
+            }
+
+            return status;
+        }
+
+        public async Task<EditProfile?> GetUserDataAsync(string email)
+        {
+            using (var tx = StateManager.CreateTransaction())
+            {
+                var userResult = await userDictionary.TryGetValueAsync(tx, email);
+
+                if (userResult.HasValue) return new EditProfile(userResult.Value);
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdateProfileAsync(EditProfile credentials)
+        {
+            bool status = false;
+
+            using (var tx = StateManager.CreateTransaction())
+            {
+                var userResult = await userDictionary.TryGetValueAsync(tx, credentials.Email);
+
+                if (!userResult.HasValue) status = false;
+                else
+                {
+                    var user = userResult.Value;
+
+                    if (!credentials.ConfirmOldPassword.Equals(user.Password)) status = false;
+                    else if(!credentials.NewPassword.Equals(credentials.ConfirmNewPassword)) status = false;
+                    else
                     {
-                        status = false;
-                        tx.Abort();
+                        try
+                        {
+                            await userDictionary.TryUpdateAsync(tx, user.Email, new User(credentials), user);
+                            await tx.CommitAsync();
+                            status = true;
+                        }
+                        catch (Exception)
+                        {
+                            status = false;
+                            tx.Abort();
+                        }
                     }
                 }
             }
