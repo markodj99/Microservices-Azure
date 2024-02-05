@@ -1,7 +1,9 @@
 using System.Fabric;
 using Common.Interfaces;
 using Common.Models.User;
+using Microsoft.ServiceFabric.Services.Client;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.Client;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 
@@ -13,19 +15,16 @@ namespace ApiGatewayStateless
     /// </summary>
     internal sealed class ApiGatewayStateless : StatelessService, IApiGateway
     {
+        private readonly IUsersService _proxy
+            = ServiceProxy.Create<IUsersService>(new Uri("fabric:/Cloud-Project/UsersStateful"), new ServicePartitionKey(1));
+
         public ApiGatewayStateless(StatelessServiceContext context) : base(context) { }
 
         public async Task<bool> LoginAsync(Login credentials)
-        {
-            int a = 5;
-
-            return true;
-        }
+            => await _proxy.LoginAsync(credentials);
 
         public async Task<bool> RegisterAsync(Register credentials)
-        {
-            throw new NotImplementedException();
-        }
+        => await _proxy.RegisterAsync(credentials);
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();

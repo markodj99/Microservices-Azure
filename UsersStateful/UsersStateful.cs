@@ -1,15 +1,11 @@
-using System.Fabric;
+using Azure.Data.Tables;
 using Common.Interfaces;
 using Common.Models.User;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
-using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
-using Microsoft.WindowsAzure.Storage.Table;
-using Microsoft.WindowsAzure.Storage;
-using Azure.Data.Tables;
-using Azure.Data.Tables.Models;
-using Azure;
+using Microsoft.ServiceFabric.Services.Runtime;
+using System.Fabric;
 
 namespace UsersStateful
 {
@@ -26,12 +22,48 @@ namespace UsersStateful
 
         public async Task<bool> LoginAsync(Login credentials)
         {
-            return false;
+            bool status = false;
+
+            using (var tx = StateManager.CreateTransaction())
+            {
+                var userResult = await userDictionary.TryGetValueAsync(tx, credentials.Email);
+
+                if (userResult.HasValue)
+                {
+                    if (userResult.Value.Password == credentials.Password) status = true;
+                }
+
+                await tx.CommitAsync();
+            }
+
+            return status;
         }
 
         public async Task<bool> RegisterAsync(Register credentials)
         {
-            return false;
+            bool status = false;
+
+            using (var tx = StateManager.CreateTransaction())
+            {
+                var userResult = await userDictionary.TryGetValueAsync(tx, credentials.Email);
+
+                if (!userResult.HasValue)
+                {
+                    try
+                    {
+                        await userDictionary.AddAsync(tx, credentials.Email, new User(credentials));
+                        await tx.CommitAsync();
+                        status = true;
+                    }
+                    catch (Exception)
+                    {
+                        status = false;
+                        tx.Abort();
+                    }
+                }
+            }
+
+            return status;
         }
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
@@ -46,6 +78,7 @@ namespace UsersStateful
         {
             await SetTableAsync();
             userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("User");
+            await PopulateUserDictionary();
 
             userTableThread = new Thread(new ThreadStart(UserTableWriteThread));
             userTableThread.Start();
@@ -53,22 +86,26 @@ namespace UsersStateful
 
         private async Task SetTableAsync()
         {
-            string connectionString = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;";
-            var tableServiceClient = new TableServiceClient(connectionString);
+            var tableServiceClient = new TableServiceClient("UseDevelopmentStorage=true");
             await tableServiceClient.CreateTableIfNotExistsAsync("User");
             userTable = tableServiceClient.GetTableClient("User");
+        }
 
-            //using (var tx = StateManager.CreateTransaction())
-            //{
-            //    var user = new User()
-            //    {
-            //        Email = "test@gmail.com",
-            //        Username = "test",
-            //        Password = "test"
-            //    };
+        private async Task PopulateUserDictionary()
+        {
+            var entities = userTable.QueryAsync<UsersTable>(x => true).GetAsyncEnumerator();
 
-            //    await userTable.AddEntityAsync(new UsersTable(user), CancellationToken.None);
-            //}
+            using (var tx = StateManager.CreateTransaction())
+            {
+
+                while (await entities.MoveNextAsync())
+                {
+                    var user = new User(entities.Current);
+                    await userDictionary.TryAddAsync(tx, user.Email, user);
+                }
+
+                await tx.CommitAsync();
+            }
         }
 
         private async void UserTableWriteThread()
@@ -82,7 +119,7 @@ namespace UsersStateful
                     while (await enumerator.MoveNextAsync(CancellationToken.None))
                     {
                         var user = enumerator.Current.Value;
-                        await userTable.UpdateEntityAsync(new UsersTable(user), ETag.All, TableUpdateMode.Merge, CancellationToken.None);
+                        await userTable.UpsertEntityAsync(new UsersTable(user), TableUpdateMode.Merge, CancellationToken.None);
                     }
                 }
 

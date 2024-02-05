@@ -22,13 +22,16 @@ namespace ClientStateless.Controllers
                 if (await _proxy.LoginAsync(credentials))
                 {
                     HttpContext.Session.SetString("Email", credentials.Email);
+                    TempData["Success"] = "Login Successful.";
                     return RedirectToAction("Index", "Home");
                 }
 
+                TempData["Error"] = "Wrong email or password.";
                 return View();
             }
             catch (Exception)
             {
+                TempData["Error"] = "Something went wrong, please try again later.";
                 return View();
             }       
         }
@@ -47,12 +50,18 @@ namespace ClientStateless.Controllers
         {
             try
             {
-                if (await _proxy.RegisterAsync(credentials)) return RedirectToAction("User", "Login");
+                if (await _proxy.RegisterAsync(credentials))
+                {
+                    TempData["Success"] = "Register Successful.";
+                    return RedirectToAction("Login", "User");
+                }
 
+                TempData["Error"] = "Username or email already taken.";
                 return View();
             }
             catch (Exception)
             {
+                TempData["Error"] = "Something went wrong, please try again later.";
                 return View();
             }
         }

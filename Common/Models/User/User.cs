@@ -1,7 +1,4 @@
-﻿using Azure.Data.Tables;
-using Azure.Data.Tables.Models;
-using Azure;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace Common.Models.User
 {
