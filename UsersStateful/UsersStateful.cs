@@ -30,7 +30,7 @@ namespace UsersStateful
 
                 if (userResult.HasValue)
                 {
-                    if (userResult.Value.Password == credentials.Password) status = true;
+                    if (userResult.Value.Password.Equals(credentials.Password)) status = true;
                 }
             }
 
