@@ -11,7 +11,6 @@ namespace Common.Models.User
         [DataMember]
         public List<Item> Items { get; set; }
 
-
         public Basket() { }
 
         public Basket(string email)
@@ -20,7 +19,7 @@ namespace Common.Models.User
             Items = new List<Item>();
         }
 
-        public void AddItem(string name)
+        public void AddItem(string name, int price)
         {
             foreach (var item in Items)
             {
@@ -31,14 +30,21 @@ namespace Common.Models.User
                 }
             }
 
-            Items.Add(new Item(name));
+            Items.Add(new Item(name, price));
         }
 
-        public int GetCount()
+        public void RemoveOne(string name)
         {
-            int count = 0;
-            foreach (var item in Items) count += item.Quantity;
-            return count;
+            for (int i = 0; i < Items.Count; i++)
+            {
+                if (Items[i].Name.Equals(name))
+                {
+                    if (Items[i].Quantity - 1 < 1) Items.RemoveAt(i);
+                    else Items[i].Quantity--;
+
+                    return;
+                }
+            }
         }
     }
 }

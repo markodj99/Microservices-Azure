@@ -9,14 +9,18 @@ namespace Common.Models.User
         public string Name { get; set; }
 
         [DataMember]
+        public int Price { get; set; }
+
+        [DataMember]
         public int Quantity { get; set; }
 
         public Item () { }
 
-        public Item (string name) 
+        public Item (string name, int price) 
         { 
             Name = name;
             Quantity = 1;
+            Price = price;
         }
     }
 }

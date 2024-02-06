@@ -18,7 +18,7 @@
                     <th scope="col">Description</th>
                     <th scope="col">Price</th>
                     <th scope="col">Quantity</th>
-                    <th scope="col">Add To Basket</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -33,7 +33,10 @@
                         <td>@product.Price</td>
                         <td>@product.Quantity</td>
                         <td>
-                            <button type="button" class="btn btn-primary" onclick="addToBasket('@product.Name')">+1</button>
+                            <div class="row">
+                                <button type="button" class="btn btn-primary" onclick="addToBasket('@product.Name', '@product.Price')">+1</button>
+                                <button type="button" class="btn btn-secondary" onclick="reduceBasket('@product.Name')">-1</button>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -43,9 +46,9 @@
 </div>
 
 <script>
-    async function addToBasket(productName) {
+    async function addToBasket(productName, productPrice) {
         try {
-            let response = await fetch('@Url.Action("AddToBasket", "Product")?productName=' + encodeURIComponent(productName), {
+            let response = await fetch('@Url.Action("AddToBasket", "Product")?productName=' + encodeURIComponent(productName) + '&productPrice=' + encodeURIComponent(productPrice), {
                 method: 'POST'
             });
 
@@ -55,6 +58,22 @@
                 toastr.success(`Car Part ${productName} Added Successfully.`);
             }
             else toastr.error(`Can't Add Car Part ${productName} now. Please try again later.`);
+        } catch (error) {
+            toastr.error(`Something went wrong. Please try again later.`);
+        }
+    }
+
+    async function reduceBasket(productName) {
+        try {
+            let response = await fetch('@Url.Action("ReduceBasket", "Product")?productName=' + encodeURIComponent(productName), {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                updateCartItemCount();
+                location.reload();
+            }
+            else toastr.error(`Can't Remoce Car Part ${productName} now. Please try again later.`);
         } catch (error) {
             toastr.error(`Something went wrong. Please try again later.`);
         }

@@ -1,1 +1,105 @@
-﻿<h1>MRS</h1>
+﻿@model Basket
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-dark py-2">Basket</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <table id="tblData" class="table table-bordered table-striped table-dark" style="width:100%">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Price</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Items.Count; i++)
+                {
+                    var product = Model.Items[i];
+                    <tr>
+                        <td scope="row">@(i + 1)</td>
+                        <td>@product.Name</td>
+                        <td>@product.Quantity</td>
+                        <td>@(product.Price * product.Quantity)</td>
+                        <td>
+                            <div class="row">
+                                <button type="button" class="btn btn-primary" onclick="addToBasket('@product.Name', '@product.Price')">+1</button>
+                                <button type="button" class="btn btn-secondary" onclick="reduceBasket('@product.Name')">-1</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="row pt-2">
+            <div class="col-6 col-md-3">
+                <a asp-controller="Product" asp-action="PayCash" class="btn btn-primary form-control">
+                    Pay With Cash
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller ="Product" asp-action="PayPal" class="btn btn-primary form-control">
+                    Pay With PayPal
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <button type="button" class="btn btn-primary" onclick="clearBasket()">Clear Basket</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function addToBasket(productName, productPrice) {
+        try {
+            let response = await fetch('@Url.Action("AddToBasket", "Product")?productName=' + encodeURIComponent(productName) + '&productPrice=' + encodeURIComponent(productPrice), {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                updateCartItemCount();
+                location.reload();
+            } else toastr.error(`Can't Add Car ${productName} now. Please try again later.`);
+        } catch (error) {
+            toastr.error(`Something went wrong. Please try again later.`);
+        }
+    }
+
+    async function reduceBasket(productName) {
+        try {
+            let response = await fetch('@Url.Action("ReduceBasket", "Product")?productName=' + encodeURIComponent(productName), {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                updateCartItemCount();
+                location.reload();
+            }
+            else toastr.error(`Can't Remoce Car ${productName} now. Please try again later.`);
+        } catch (error) {
+            toastr.error(`Something went wrong. Please try again later.`);
+        }
+    }
+
+    async function clearBasket() {
+        try {
+            let response = await fetch('@Url.Action("ClearBasket", "Product")', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                updateCartItemCount();
+                location.reload();
+            } else toastr.error(`Can't clear basket now. Please try again later.`);
+        } catch (error) {
+            toastr.error(`Something went wrong. Please try again later.`);
+        }
+    }
+</script>
