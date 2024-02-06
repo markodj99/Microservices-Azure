@@ -40,6 +40,7 @@ namespace ClientStateless.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("Email");
+            HttpContext.Session.Remove("Basket");
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }

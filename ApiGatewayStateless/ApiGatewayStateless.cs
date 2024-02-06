@@ -1,5 +1,7 @@
 using System.Fabric;
+using System.Threading.Tasks;
 using Common.Interfaces;
+using Common.Models.Product;
 using Common.Models.User;
 using Microsoft.ServiceFabric.Services.Client;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -15,22 +17,28 @@ namespace ApiGatewayStateless
     /// </summary>
     internal sealed class ApiGatewayStateless : StatelessService, IApiGateway
     {
-        private readonly IUsersService _proxy
+        private readonly IUsersService _userProxy
             = ServiceProxy.Create<IUsersService>(new Uri("fabric:/Cloud-Project/UsersStateful"), new ServicePartitionKey(1));
+
+        private readonly IProductsService _productProxy
+            = ServiceProxy.Create<IProductsService>(new Uri("fabric:/Cloud-Project/ProductsStateful"), new ServicePartitionKey(1));
 
         public ApiGatewayStateless(StatelessServiceContext context) : base(context) { }
 
         public async Task<bool> LoginAsync(Login credentials)
-            => await _proxy.LoginAsync(credentials);
+            => await _userProxy.LoginAsync(credentials);
 
         public async Task<bool> RegisterAsync(Register credentials)
-            => await _proxy.RegisterAsync(credentials);
+            => await _userProxy.RegisterAsync(credentials);
 
         public async Task<EditProfile?> GetUserDataAsync(string email)
-            => await _proxy.GetUserDataAsync(email);
+            => await _userProxy.GetUserDataAsync(email);
 
         public async Task<bool> UpdateProfileAsync(EditProfile credentials)
-            => await _proxy.UpdateProfileAsync(credentials);
+            => await _userProxy.UpdateProfileAsync(credentials);
+
+        public async Task<List<Product>> GetAllProductsByCategory(string category)
+            => await _productProxy.GetAllProductsByCategory(category);
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();

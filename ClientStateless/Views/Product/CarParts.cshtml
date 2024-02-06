@@ -1,0 +1,62 @@
+﻿@model List<Product>
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-dark py-2">Car Parts</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <table id="tblData" class="table table-bordered table-striped table-dark" style="width:100%">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Add To Basket</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var product = Model[i];
+                    <tr>
+                        <td scope="row">@(i + 1)</td>
+                        <td>@product.Name</td>
+                        <td>@product.Category</td>
+                        <td>@product.Desc</td>
+                        <td>@product.Price</td>
+                        <td>@product.Quantity</td>
+                        <td>
+                            <button type="button" class="btn btn-primary" onclick="addToBasket('@product.Name')">+1</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function addToBasket(productName) {
+        try {
+            let response = await fetch('@Url.Action("AddToBasket", "Product")?productName=' + encodeURIComponent(productName), {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                updateCartItemCount();
+                location.reload();
+                toastr.success(`Car Part ${productName} Added Successfully.`);
+            }
+            else toastr.error(`Can't Add Car Part ${productName} now. Please try again later.`);
+        } catch (error) {
+            toastr.error(`Something went wrong. Please try again later.`);
+        }
+    }
+</script>

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ClientStateless.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body>
     <header>
@@ -21,11 +22,17 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Product" asp-action="All">Products</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Session.GetString("Email")))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Product" asp-action="CheckOut" id="cart-icon">
+                                    <i class="bi bi-cart3"></i>
+                                    <span id="cart-items-count"></span>
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
                 <div>
@@ -63,6 +70,27 @@
             &copy; 2024 - Cloud-Project
         </div>
     </footer>
+    <script>
+        function updateCartItemCount() {
+            let basketJson = @Html.Raw(Json.Serialize(ViewContext.HttpContext.Session.GetString("Basket")));
+            let basket = basketJson ? JSON.parse(basketJson) : null;
+
+            if (document.getElementById('cart-items-count')) {
+                if (!basket) document.getElementById('cart-items-count').innerText = 0;
+                else {
+                    let count = 0;
+
+                    for (let i = 0; i < basket.Items.length; i++) {
+                        count += basket.Items[i].Quantity;
+                    }
+
+                    document.getElementById('cart-items-count').innerText = count;
+                }
+            }
+        }
+
+        updateCartItemCount();
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

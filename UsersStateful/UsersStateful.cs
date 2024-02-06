@@ -14,9 +14,9 @@ namespace UsersStateful
     /// </summary>
     internal sealed class UsersStateful : StatefulService, IUsersService
     {
-        private TableClient userTable;
-        private Thread userTableThread;
-        private IReliableDictionary<string, User> userDictionary;
+        private TableClient userTable = null;
+        private Thread userTableThread = null;
+        private IReliableDictionary<string, User> userDictionary = null;
 
         public UsersStateful(StatefulServiceContext context) : base(context) { }
 
@@ -145,7 +145,6 @@ namespace UsersStateful
 
             using (var tx = StateManager.CreateTransaction())
             {
-
                 while (await entities.MoveNextAsync())
                 {
                     var user = new User(entities.Current);

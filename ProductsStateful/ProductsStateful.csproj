@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsServiceFabricServiceProject>True</IsServiceFabricServiceProject>
+    <ServerGarbageCollection>True</ServerGarbageCollection>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>True</SelfContained>
+    <UserSecretsId>0b822c81-8993-435a-8028-74f07fbceea8</UserSecretsId>
+  </PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Azure.Data.Tables" Version="12.8.2" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.13.1" />
+		<PackageReference Include="Azure.Storage.Files.Shares" Version="12.1.0" />
+		<PackageReference Include="Azure.Storage.Queues" Version="12.11.1" />
+		<PackageReference Include="Microsoft.Extensions.Azure" Version="1.5.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+		<PackageReference Include="Microsoft.ServiceFabric.Services" Version="6.0.1672" />
+		<PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="6.0.1672" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\Common\Common.csproj" />
+	</ItemGroup>
+
+</Project>

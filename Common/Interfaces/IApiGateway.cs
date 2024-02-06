@@ -1,4 +1,5 @@
-﻿using Common.Models.User;
+﻿using Common.Models.Product;
+using Common.Models.User;
 using Microsoft.ServiceFabric.Services.Remoting;
 using System.ServiceModel;
 
@@ -18,5 +19,8 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<bool> UpdateProfileAsync(EditProfile credentials);
+
+        [OperationContract]
+        Task<List<Product>> GetAllProductsByCategory(string category);
     }
 }
