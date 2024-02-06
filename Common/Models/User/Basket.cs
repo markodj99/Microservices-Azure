@@ -11,12 +11,16 @@ namespace Common.Models.User
         [DataMember]
         public List<Item> Items { get; set; }
 
+        [DataMember]
+        public string PaymentMethod { get; set; }
+
         public Basket() { }
 
         public Basket(string email)
         {
             Email = email;
             Items = new List<Item>();
+            PaymentMethod = "Unknown";
         }
 
         public void AddItem(string name, int price)

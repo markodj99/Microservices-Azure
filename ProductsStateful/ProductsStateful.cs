@@ -20,7 +20,7 @@ namespace ProductsStateful
 
         public ProductsStateful(StatefulServiceContext context) : base(context) { }
 
-        public async Task<List<Product>> GetAllProductsByCategory(string category)
+        public async Task<List<Product>> GetAllProductsByCategoryAsync(string category)
         {
             var products = new List<Product>();
 

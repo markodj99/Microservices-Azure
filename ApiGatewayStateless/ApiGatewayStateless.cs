@@ -1,4 +1,5 @@
 using System.Fabric;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using Common.Interfaces;
 using Common.Models.Product;
@@ -37,8 +38,10 @@ namespace ApiGatewayStateless
         public async Task<bool> UpdateProfileAsync(EditProfile credentials)
             => await _userProxy.UpdateProfileAsync(credentials);
 
-        public async Task<List<Product>> GetAllProductsByCategory(string category)
-            => await _productProxy.GetAllProductsByCategory(category);
+        public async Task<List<Product>> GetAllProductsByCategoryAsync(string category)
+            => await _productProxy.GetAllProductsByCategoryAsync(category);
+
+        public async Task<bool> MakePurchaseAsync(Basket basket) => false;
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();

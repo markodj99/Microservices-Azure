@@ -40,14 +40,10 @@
         </table>
         <div class="row pt-2">
             <div class="col-6 col-md-3">
-                <a asp-controller="Product" asp-action="PayCash" class="btn btn-primary form-control">
-                    Pay With Cash
-                </a>
+                <button type="button" class="btn btn-primary" onclick="makePurchase('Cash')">Pay With Cash</button>
             </div>
             <div class="col-6 col-md-3">
-                <a asp-controller ="Product" asp-action="PayPal" class="btn btn-primary form-control">
-                    Pay With PayPal
-                </a>
+                <button type="button" class="btn btn-primary" onclick="makePurchase('PayPal')">Pay With PayPal</button>
             </div>
             <div class="col-6 col-md-3">
                 <button type="button" class="btn btn-primary" onclick="clearBasket()">Clear Basket</button>
@@ -83,6 +79,21 @@
                 location.reload();
             }
             else toastr.error(`Can't Remoce Car ${productName} now. Please try again later.`);
+        } catch (error) {
+            toastr.error(`Something went wrong. Please try again later.`);
+        }
+    }
+
+    async function makePurchase(paymentmethod) {
+        try {
+            let response = await fetch('@Url.Action("MakePurchase", "Product")?paymentmethod=' + encodeURIComponent(paymentmethod), {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                updateCartItemCount();
+                toastr.success('Payment Approved. Delivery Has Started.');
+            } else toastr.error(`Bad Request!`);
         } catch (error) {
             toastr.error(`Something went wrong. Please try again later.`);
         }

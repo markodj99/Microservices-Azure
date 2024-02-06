@@ -8,6 +8,6 @@ namespace Common.Interfaces
     public interface IProductsService : IService
     {
         [OperationContract]
-        Task<List<Product>> GetAllProductsByCategory(string category);
+        Task<List<Product>> GetAllProductsByCategoryAsync(string category);
     }
 }

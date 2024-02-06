@@ -21,6 +21,9 @@ namespace Common.Interfaces
         Task<bool> UpdateProfileAsync(EditProfile credentials);
 
         [OperationContract]
-        Task<List<Product>> GetAllProductsByCategory(string category);
+        Task<List<Product>> GetAllProductsByCategoryAsync(string category);
+
+        [OperationContract]
+        Task<bool> MakePurchaseAsync(Basket basket);
     }
 }

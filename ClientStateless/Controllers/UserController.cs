@@ -87,6 +87,8 @@ namespace ClientStateless.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(EditProfile credentials)
         {
+            if (HttpContext.Session.GetString("Email") is null) return RedirectToAction("Login", "User");
+
             try
             {
                 if (await _proxy.UpdateProfileAsync(credentials))
