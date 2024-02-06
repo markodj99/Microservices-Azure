@@ -18,5 +18,11 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<bool> UpdateProfileAsync(EditProfile credentials);
+
+        [OperationContract]
+        Task<bool> UserExistsAsync(string email);
+
+        [OperationContract]
+        Task MakePurchaseAsync(Basket basket);
     }
 }

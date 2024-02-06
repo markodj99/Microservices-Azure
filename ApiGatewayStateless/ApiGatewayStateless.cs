@@ -1,6 +1,3 @@
-using System.Fabric;
-using System.ServiceModel;
-using System.Threading.Tasks;
 using Common.Interfaces;
 using Common.Models.Product;
 using Common.Models.User;
@@ -9,7 +6,7 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
-
+using System.Fabric;
 
 namespace ApiGatewayStateless
 {
@@ -23,6 +20,9 @@ namespace ApiGatewayStateless
 
         private readonly IProductsService _productProxy
             = ServiceProxy.Create<IProductsService>(new Uri("fabric:/Cloud-Project/ProductsStateful"), new ServicePartitionKey(1));
+
+        private readonly ICoordinator _coordinatorProxy
+            = ServiceProxy.Create<ICoordinator>(new Uri("fabric:/Cloud-Project/CoordinatorStateful"), new ServicePartitionKey(1));
 
         public ApiGatewayStateless(StatelessServiceContext context) : base(context) { }
 
@@ -41,7 +41,8 @@ namespace ApiGatewayStateless
         public async Task<List<Product>> GetAllProductsByCategoryAsync(string category)
             => await _productProxy.GetAllProductsByCategoryAsync(category);
 
-        public async Task<bool> MakePurchaseAsync(Basket basket) => false;
+        public async Task<bool> MakePurchaseAsync(Basket basket) 
+            => await _coordinatorProxy.MakePurchaseAsync(basket);
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();

@@ -1,10 +1,12 @@
 using Azure.Data.Tables;
 using Common.Interfaces;
 using Common.Models.Product;
+using Common.Models.User;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using System.Diagnostics;
 using System.Fabric;
 
 namespace ProductsStateful
@@ -36,6 +38,48 @@ namespace ProductsStateful
             }
 
             return products;
+        }
+
+        public async Task<bool> CanBuyAsync(List<Item> items)
+        {
+            foreach (var item in items)
+            {
+                using (var tx = StateManager.CreateTransaction())
+                {
+                    var productResult = await productDictionary.TryGetValueAsync(tx, item.Name);
+
+                    if (!productResult.HasValue) return false;
+                    if (productResult.Value.Quantity - item.Quantity < 0) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public async Task MakePurchaseAsync(List<Item> items)
+        {
+            foreach (var item in items)
+            {
+                using (var tx = StateManager.CreateTransaction())
+                {
+                    var productResult = await productDictionary.TryGetValueAsync(tx, item.Name);
+
+                    if (productResult.HasValue)
+                    {
+                        var oldProduct = productResult.Value;
+                        var newProduct = new Product { 
+                            Name = oldProduct.Name,
+                            Category = oldProduct.Category,
+                            Desc = oldProduct.Desc,
+                            Price = oldProduct.Price,
+                            Quantity = oldProduct.Quantity - item.Quantity
+                        };
+
+                        await productDictionary.TryUpdateAsync(tx, oldProduct.Name, newProduct, oldProduct);
+                        await tx.CommitAsync();
+                    }
+                }
+            }
         }
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()

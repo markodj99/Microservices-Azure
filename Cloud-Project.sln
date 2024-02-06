@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UsersStateful", "UsersState
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductsStateful", "ProductsStateful\ProductsStateful.csproj", "{669D1CB4-F991-45CD-B5C9-098D2444805D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoordinatorStateful", "CoordinatorStateful\CoordinatorStateful.csproj", "{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,14 @@ Global
 		{669D1CB4-F991-45CD-B5C9-098D2444805D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{669D1CB4-F991-45CD-B5C9-098D2444805D}.Release|x64.ActiveCfg = Release|Any CPU
 		{669D1CB4-F991-45CD-B5C9-098D2444805D}.Release|x64.Build.0 = Release|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Debug|x64.Build.0 = Debug|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Release|x64.ActiveCfg = Release|Any CPU
+		{71D66C4E-FA7A-4857-8DE9-681B7AB854B5}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

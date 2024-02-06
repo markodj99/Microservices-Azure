@@ -63,7 +63,15 @@ namespace ClientStateless.Controllers
             if (basket.Items.Count == 0) return BadRequest();
 
             basket.PaymentMethod = paymentmethod;
-            return (await _proxy.MakePurchaseAsync(basket)) ? Ok() : BadRequest();
+            bool response = await _proxy.MakePurchaseAsync(basket);
+
+            if (response)
+            {
+                HttpContext.Session.Remove("Basket");
+                return Ok();
+            }
+
+            return BadRequest();
         }
 
         [HttpPost]

@@ -14,11 +14,21 @@ namespace UsersStateful
     /// </summary>
     internal sealed class UsersStateful : StatefulService, IUsersService
     {
+        #region Fields
+
         private TableClient userTable = null;
         private Thread userTableThread = null;
         private IReliableDictionary<string, User> userDictionary = null;
 
+        private TableClient userPurchaseTable = null;
+        private Thread userPurchaseTableThread = null;
+        private IReliableDictionary<string, UserPurchase> userPurchaseDictionary = null;
+
+        #endregion
+
         public UsersStateful(StatefulServiceContext context) : base(context) { }
+
+        #region Services
 
         public async Task<bool> LoginAsync(Login credentials)
         {
@@ -114,25 +124,62 @@ namespace UsersStateful
             return status;
         }
 
+        public async Task<bool> UserExistsAsync(string email)
+        {
+            bool status = false;
+
+            using (var tx = StateManager.CreateTransaction())
+            {
+                var userResult = await userDictionary.TryGetValueAsync(tx, email);
+
+                if (userResult.HasValue) status = true;
+            }
+
+            return status;
+        }
+
+        public async Task MakePurchaseAsync(Basket basket)
+        {
+            using (var tx = StateManager.CreateTransaction())
+            {
+                try
+                {
+                    var entity = new UserPurchase(basket);
+                    await userPurchaseDictionary.AddAsync(tx, entity.Id, entity);
+                    await tx.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    tx.Abort();
+                }
+            }
+        }
+
+        #endregion
+
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
             => this.CreateServiceRemotingReplicaListeners();
 
-        /// <summary>
-        /// This is the main entry point for your service replica.
-        /// This method executes when this replica of your service becomes primary and has write status.
-        /// </summary>
-        /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
+        #region Start
+
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            await SetTableAsync();
+            await SetUserTableAsync();
             userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("User");
             await PopulateUserDictionary();
 
             userTableThread = new Thread(new ThreadStart(UserTableWriteThread));
             userTableThread.Start();
+
+            await SetUserPurchaseTableAsync();
+            userPurchaseDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<string, UserPurchase>>("UserPurchase");
+            await PopulateUserPurchaseDictionary();
+
+            userPurchaseTableThread = new Thread(new ThreadStart(UserPurchaseTableWriteThread));
+            userPurchaseTableThread.Start();
         }
 
-        private async Task SetTableAsync()
+        private async Task SetUserTableAsync()
         {
             var tableServiceClient = new TableServiceClient("UseDevelopmentStorage=true");
             await tableServiceClient.CreateTableIfNotExistsAsync("User");
@@ -173,5 +220,49 @@ namespace UsersStateful
                 Thread.Sleep(5000);
             }
         }
+
+        private async Task SetUserPurchaseTableAsync()
+        {
+            var tableServiceClient = new TableServiceClient("UseDevelopmentStorage=true");
+            await tableServiceClient.CreateTableIfNotExistsAsync("UserPurchase");
+            userPurchaseTable = tableServiceClient.GetTableClient("UserPurchase");
+        }
+
+        private async Task PopulateUserPurchaseDictionary()
+        {
+            var entities = userPurchaseTable.QueryAsync<UserPurchasesTable>(x => true).GetAsyncEnumerator();
+
+            using (var tx = StateManager.CreateTransaction())
+            {
+                while (await entities.MoveNextAsync())
+                {
+                    var purchase = new UserPurchase(entities.Current);
+                    await userPurchaseDictionary.TryAddAsync(tx, purchase.Id, purchase);
+                }
+
+                await tx.CommitAsync();
+            }
+        }
+
+        private async void UserPurchaseTableWriteThread()
+        {
+            while (true)
+            {
+                using (var tx = StateManager.CreateTransaction())
+                {
+                    var enumerator = (await userPurchaseDictionary.CreateEnumerableAsync(tx)).GetAsyncEnumerator();
+
+                    while (await enumerator.MoveNextAsync(CancellationToken.None))
+                    {
+                        var purchase = enumerator.Current.Value;
+                        await userPurchaseTable.UpsertEntityAsync(new UserPurchasesTable(purchase), TableUpdateMode.Merge, CancellationToken.None);
+                    }
+                }
+
+                Thread.Sleep(5000);
+            }
+        }
+
+        #endregion
     }
 }
