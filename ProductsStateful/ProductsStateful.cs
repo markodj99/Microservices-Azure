@@ -6,19 +6,15 @@ using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
-using System.Diagnostics;
 using System.Fabric;
 
 namespace ProductsStateful
 {
-    /// <summary>
-    /// An instance of this class is created for each service replica by the Service Fabric runtime.
-    /// </summary>
     internal sealed class ProductsStateful : StatefulService, IProductsService
     {
-        private TableClient productTable = null;
-        private Thread productTableThread = null;
-        private IReliableDictionary<string, Product> productDictionary = null;
+        private TableClient productTable = null!;
+        private Thread productTableThread = null!;
+        private IReliableDictionary<string, Product> productDictionary = null!;
 
         public ProductsStateful(StatefulServiceContext context) : base(context) { }
 
@@ -85,11 +81,6 @@ namespace ProductsStateful
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
             => this.CreateServiceRemotingReplicaListeners();
 
-        /// <summary>
-        /// This is the main entry point for your service replica.
-        /// This method executes when this replica of your service becomes primary and has write status.
-        /// </summary>
-        /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
             await SetTableAsync();

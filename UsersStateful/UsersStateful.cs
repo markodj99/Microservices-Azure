@@ -9,20 +9,17 @@ using System.Fabric;
 
 namespace UsersStateful
 {
-    /// <summary>
-    /// An instance of this class is created for each service replica by the Service Fabric runtime.
-    /// </summary>
     internal sealed class UsersStateful : StatefulService, IUsersService
     {
         #region Fields
 
-        private TableClient userTable = null;
-        private Thread userTableThread = null;
-        private IReliableDictionary<string, User> userDictionary = null;
+        private TableClient userTable = null!;
+        private Thread userTableThread = null!;
+        private IReliableDictionary<string, User> userDictionary = null!;
 
-        private TableClient userPurchaseTable = null;
-        private Thread userPurchaseTableThread = null;
-        private IReliableDictionary<string, UserPurchase> userPurchaseDictionary = null;
+        private TableClient userPurchaseTable = null!;
+        private Thread userPurchaseTableThread = null!;
+        private IReliableDictionary<string, UserPurchase> userPurchaseDictionary = null!;
 
         #endregion
 

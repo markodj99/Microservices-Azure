@@ -10,19 +10,11 @@ using System.Fabric;
 
 namespace ApiGatewayStateless
 {
-    /// <summary>
-    /// An instance of this class is created for each service instance by the Service Fabric runtime.
-    /// </summary>
     internal sealed class ApiGatewayStateless : StatelessService, IApiGateway
     {
-        private readonly IUsersService _userProxy
-            = ServiceProxy.Create<IUsersService>(new Uri("fabric:/Cloud-Project/UsersStateful"), new ServicePartitionKey(1));
-
-        private readonly IProductsService _productProxy
-            = ServiceProxy.Create<IProductsService>(new Uri("fabric:/Cloud-Project/ProductsStateful"), new ServicePartitionKey(1));
-
-        private readonly ICoordinator _coordinatorProxy
-            = ServiceProxy.Create<ICoordinator>(new Uri("fabric:/Cloud-Project/CoordinatorStateful"), new ServicePartitionKey(1));
+        private IUsersService _userProxy = null!;
+        private IProductsService _productProxy = null!;
+        private ICoordinator _coordinatorProxy = null!;
 
         public ApiGatewayStateless(StatelessServiceContext context) : base(context) { }
 
@@ -53,24 +45,57 @@ namespace ApiGatewayStateless
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();
 
-        /// <summary>
-        /// This is the main entry point for your service instance.
-        /// </summary>
-        /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service instance.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following sample code with your own logic 
-            //       or remove this RunAsync override if it's not needed in your service.
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/Cloud-Project/UsersStateful");
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
 
-            long iterations = 0;
-
-            while (true)
+            foreach (var partition in partitionList)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
 
-                ServiceEventSource.Current.ServiceMessage(this.Context, "Working-{0}", ++iterations);
+                if (partitionKey != null)
+                {
+                    var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    _userProxy = ServiceProxy.Create<IUsersService>(serviceUri, servicePartitionKey);
+                    break;
+                }
+            }
+
+            fabricClient = new FabricClient();
+            serviceUri = new Uri("fabric:/Cloud-Project/ProductsStateful");
+            partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
+
+                if (partitionKey != null)
+                {
+                    var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
+
+                    _productProxy = ServiceProxy.Create<IProductsService>(serviceUri, servicePartitionKey);
+                    break;
+                }
+            }
+
+            fabricClient = new FabricClient();
+            serviceUri = new Uri("fabric:/Cloud-Project/CoordinatorStateful");
+            partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = partition.PartitionInformation as Int64RangePartitionInformation;
+
+                if (partitionKey != null)
+                {
+                    var servicePartitionKey = new ServicePartitionKey(partitionKey.LowKey);
+
+                    _coordinatorProxy = ServiceProxy.Create<ICoordinator>(serviceUri, servicePartitionKey);
+                    break;
+                }
             }
         }
     }
