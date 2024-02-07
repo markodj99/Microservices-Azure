@@ -40,10 +40,10 @@
         </table>
         <div class="row pt-2">
             <div class="col-6 col-md-3">
-                <button type="button" class="btn btn-primary" onclick="makePurchase('Cash')">Pay With Cash</button>
+                <button type="button" class="btn btn-primary" onclick="makePurchaseCash()">Pay With Cash</button>
             </div>
             <div class="col-6 col-md-3">
-                <button type="button" class="btn btn-primary" onclick="makePurchase('PayPal')">Pay With PayPal</button>
+                <div id="paypal-button-container"></div>
             </div>
             <div class="col-6 col-md-3">
                 <button type="button" class="btn btn-primary" onclick="clearBasket()">Clear Basket</button>
@@ -84,9 +84,45 @@
         }
     }
 
-    async function makePurchase(paymentmethod) {
+    let paypal_buttons = paypal.Buttons({
+        createOrder() {
+            return fetch("@Url.Action("CreateOrder", "Product")", {
+                method: "POST"
+            })
+            .then((response) => response.json())
+            .then((order) => order.id);
+        },
+
+        onApprove(data) {
+            return fetch("@Url.Action("CompleteOrder", "Product")", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    orderID: data.orderID
+                })
+            })
+            .then((response) => response.json())
+            .then((details) => {
+                if (details === 'success') toastr.success('The Order Is Created Successfully!');
+                else toastr.error(`Failed To Create The Order!`);
+            });
+        },
+
+        onCancel(data) {
+            toastr.error(`The Order Is Canceled!`);
+        },
+
+        onError(err) {
+            toastr.error(`Failed To Create The Order!`);
+        }
+    });
+    paypal_buttons.render('#paypal-button-container');
+
+    async function makePurchaseCash() {
         try {
-            let response = await fetch('@Url.Action("MakePurchase", "Product")?paymentmethod=' + encodeURIComponent(paymentmethod), {
+            let response = await fetch('@Url.Action("MakePurchaseCash", "Product")', {
                 method: 'POST'
             });
 

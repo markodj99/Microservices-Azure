@@ -44,6 +44,9 @@ namespace ApiGatewayStateless
         public async Task<bool> MakePurchaseAsync(Basket basket) 
             => await _coordinatorProxy.MakePurchaseAsync(basket);
 
+        public async Task<bool> CanPurchaseAsync(List<Item> items)
+            => await _coordinatorProxy.CanPurchaseAsync(items);
+
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();
 

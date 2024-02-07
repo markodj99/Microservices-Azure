@@ -9,5 +9,8 @@ namespace Common.Interfaces
     {
         [OperationContract]
         Task<bool> MakePurchaseAsync(Basket basket);
+
+        [OperationContract]
+        Task<bool> CanPurchaseAsync(List<Item> items);
     }
 }

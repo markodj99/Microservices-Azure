@@ -34,6 +34,9 @@ namespace CoordinatorStateful
             return true;
         }
 
+        public async Task<bool> CanPurchaseAsync(List<Item> items)
+            => await _productProxy.CanBuyAsync(items);
+
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
             => this.CreateServiceRemotingReplicaListeners();
 
