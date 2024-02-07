@@ -1,0 +1,37 @@
+﻿@model List<UserPurchase>
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-dark py-2">My Purchases</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <table id="tblData" class="table table-bordered table-striped table-dark" style="width:100%">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Items</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var product = Model[i];
+                    <tr>
+                        <td scope="row">@(i + 1)</td>
+                        <td>@product.Method</td>
+                        <td>@product.Time.ToString()</td>
+                        <td>@product.Items</td>
+                        <td>@product.Amount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

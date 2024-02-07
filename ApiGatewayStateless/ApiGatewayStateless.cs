@@ -47,6 +47,9 @@ namespace ApiGatewayStateless
         public async Task<bool> CanPurchaseAsync(List<Item> items)
             => await _coordinatorProxy.CanPurchaseAsync(items);
 
+        public async Task<List<UserPurchase>> GetHistoryAsync(string email)
+            => await _userProxy.GetHistoryAsync(email);
+
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
             => this.CreateServiceRemotingInstanceListeners();
 

@@ -106,5 +106,11 @@ namespace ClientStateless.Controllers
                 return RedirectToAction("Edit", "User");
             }
         }
+
+        public async Task<IActionResult> History()
+        {
+            if (HttpContext.Session.GetString("Email") is null) return RedirectToAction("Login", "User");
+            return View(await _proxy.GetHistoryAsync(HttpContext.Session.GetString("Email") ?? "Error"));
+        }
     }
 }

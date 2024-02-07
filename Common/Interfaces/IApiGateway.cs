@@ -28,5 +28,8 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<bool> CanPurchaseAsync(List<Item> items);
+
+        [OperationContract]
+        Task<List<UserPurchase>> GetHistoryAsync(string email);
     }
 }

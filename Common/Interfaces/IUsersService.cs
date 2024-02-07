@@ -24,5 +24,8 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task MakePurchaseAsync(Basket basket);
+
+        [OperationContract]
+        Task<List<UserPurchase>> GetHistoryAsync(string email);
     }
 }

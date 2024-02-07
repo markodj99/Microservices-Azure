@@ -155,6 +155,24 @@ namespace UsersStateful
             }
         }
 
+        public async Task<List<UserPurchase>> GetHistoryAsync(string email)
+        {
+            var retVal = new List<UserPurchase>();
+
+            using (var tx = StateManager.CreateTransaction())
+            {
+                var enumerator = (await userPurchaseDictionary.CreateEnumerableAsync(tx)).GetAsyncEnumerator();
+
+                while (await enumerator.MoveNextAsync(CancellationToken.None))
+                {
+                    var purchase = enumerator.Current.Value;
+                    if (purchase.Email.Equals(email)) retVal.Add(purchase);
+                }
+            }
+
+            return retVal;
+        }
+
         #endregion
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
