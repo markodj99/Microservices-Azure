@@ -39,6 +39,18 @@
             </tbody>
         </table>
         <div class="row pt-2">
+            @if (true)
+            {
+                int amount = 0;
+                foreach (var item in Model.Items)
+                {
+                    amount += (item.Quantity * item.Price);
+                }
+
+                <div class="col-6 col-md-3">
+                    <span>Total Amount: @amount</span>
+                </div>
+            }
             <div class="col-6 col-md-3">
                 <button type="button" class="btn btn-primary" onclick="makePurchaseCash()">Pay With Cash</button>
             </div>
