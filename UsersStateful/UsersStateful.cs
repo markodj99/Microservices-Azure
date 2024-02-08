@@ -167,7 +167,7 @@ namespace UsersStateful
                 }
             }
 
-            return retVal;
+            return retVal.OrderByDescending(x => x.Time).ToList();
         }
 
         #endregion
